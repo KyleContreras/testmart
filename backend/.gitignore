@@ -1,0 +1,97 @@
+﻿# Ignore build output directories
+bin/
+obj/
+
+# Rider-specific files
+.idea/
+*.sln.iml
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Core generated files
+wwwroot/
+node_modules/
+bower_components/
+
+# Configuration files
+appsettings*.json
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Rider-specific caches
+.idea/
+.idea_modules/
+.idea/libraries/
+.idea/artifacts/
+.idea/sandbox/
+.idea/modules.xml
+.idea/gradle.xml
+.idea/tasks.xml
+.idea/workspace.xml
+.idea/jsLibraryMappings.xml
+.idea/testCodeStyleSettings.xml
+.idea/encodings.xml
+.idea/assetWizard.xml
+.idea/reveal.xml
+.idea/codeStyles
+.idea/fileTemplates/internal
+.idea/fileTemplates/includes
+.idea/fileTemplates/code
+.idea/fileTemplates/liveTemplates
+.idea/fileTemplates/codeTemplates
+.idea/fileTemplates/liveTemplates/xmlCode
+.idea/fileTemplates/liveTemplates/xmlCodeTemplates
+.idea/fileTemplates/liveTemplates/vue
+.idea/fileTemplates/code
+.idea/fileTemplates/liveTemplates
+.idea/fileTemplates/internal
+.idea/fileTemplates/liveTemplates
+.idea/fileTemplates/code
+.idea/fileTemplates/liveTemplates/xmlCodeTemplates
+.idea/fileTemplates/liveTemplates/vue
+.idea/fileTemplates/liveTemplates
+.idea/fileTemplates/liveTemplates/xmlCodeTemplates
+.idea/fileTemplates/liveTemplates/vue
+.idea/fileTemplates/liveTemplates
+.idea/fileTemplates/liveTemplates/xmlCodeTemplates
+.idea/fileTemplates/liveTemplates/vue
+.idea/fileTemplates/liveTemplates
+.idea/fileTemplates/liveTemplates/xmlCodeTemplates
+.idea/fileTemplates/liveTemplates/vue
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Resharper
+_ReSharper*/
+resharper.xml
+resharper-[a-zA-Z]*.xml
+
+# Rider
+.idea/
+.idea_modules/
+
+# Visual Studio
+.vscode/
+.vscode/settings.json
+
+# Temporary files
+*.swp
+*.tmp
+
+# Extra stuff
+client_secret_gmail.json
