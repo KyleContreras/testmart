@@ -27,9 +27,11 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 12;
     options.Password.RequiredUniqueChars = 1;
+    
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
+    
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!@#$%^&*()";
     options.User.RequireUniqueEmail = false;
@@ -52,10 +54,6 @@ builder.Configuration.AddEnvironmentVariables();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
-
-// Debug statements
-Console.WriteLine($"SecretKey: {secretKey}"); // Debugging statement
-Console.WriteLine($"SecretKey length: {secretKey.Length}");
 
 if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32)
 {

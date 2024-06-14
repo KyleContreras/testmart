@@ -31,6 +31,7 @@ namespace backend.Controllers
             _emailSender = emailSender;
         }
 
+        
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
@@ -47,36 +48,35 @@ namespace backend.Controllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var createdUser = await _userManager.CreateAsync(user, model.Password);
 
-            if (result.Succeeded)
+            if (createdUser.Succeeded)
             {
                 _logger.LogInformation("New user created.");
 
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                var token = GenerateJwtToken(user);
+
+                var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var callbackUrl = Url.Action(
                     "ConfirmEmail", "Account",
-                    new { userId = user.Id, code = code },
+                    new { userId = user.Id, code = emailConfirmationToken },
                     protocol: HttpContext.Request.Scheme);
 
                 await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    $"<a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Click to confirm</a>.");
 
-                if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                return Ok(new
                 {
-                    return Ok(new { Message = "Registration successful. Please check your email to confirm your account." });
-                }
-                else
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    var token = GenerateJwtToken(user);
-                    return Ok(new { Token = token });
-                }
+                    Token = token,
+                    Message = "Registration successful. Check your email to confirm your account."
+                });
             }
 
-            return BadRequest(result.Errors);
+            return BadRequest(createdUser.Errors);
         }
 
+        
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -94,6 +94,7 @@ namespace backend.Controllers
             return Unauthorized();
         }
 
+        
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -102,6 +103,7 @@ namespace backend.Controllers
             return Ok(new { Message = "User logged out successfully." });
         }
 
+        
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteAccount()
         {
@@ -149,6 +151,7 @@ namespace backend.Controllers
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"];
             
+            //Test
             Console.WriteLine("This is the secret key: " + secretKey);
 
             if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32) {
