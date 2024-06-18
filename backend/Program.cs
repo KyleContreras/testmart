@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using backend.Models;
 using backend.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
+//using WebPWrecover.Services
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
@@ -27,6 +27,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 12;
     options.Password.RequiredUniqueChars = 1;
+
+    options.SignIn.RequireConfirmedEmail = true;
     
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
@@ -62,14 +64,9 @@ if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32)
 
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -80,12 +77,7 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = jwtSettings["Audience"],
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
     };
-})
-.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-{
-    builder.Configuration.Bind("CookieSettings", options);
 });
 
 builder.Services.AddCors(options =>
