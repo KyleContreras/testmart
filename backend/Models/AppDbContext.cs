@@ -4,6 +4,7 @@ namespace backend.Models;
 
 public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
+    // This is how context configuration from AddDbContext is passed to the DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
 
     public DbSet<Product> Products { get; set; }

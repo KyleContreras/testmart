@@ -9,6 +9,8 @@ using backend.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text.Encodings.Web;
 
+
+// AppDbContext can be used in controllers or other services through constructor injection
 namespace backend.Controllers
 {
     [ApiController]
