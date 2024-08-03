@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text;
 using backend.Models;
 using backend.Services;
-//using WebPWrecover.Services
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,8 +41,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<ProjectHttpClient>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 

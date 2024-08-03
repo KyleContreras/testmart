@@ -124,6 +124,7 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    
     [HttpGet("confirmemail")]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
@@ -147,6 +148,7 @@ public class AccountController : ControllerBase
         return BadRequest("Error confirming your email.");
     }
 
+    
     private string GenerateJwtToken(ApplicationUser user)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
