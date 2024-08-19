@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using backend.DTO;
-using backend.Services;
+using backend.Interfaces;
 
 namespace backend.Controllers;
 
@@ -9,14 +9,14 @@ namespace backend.Controllers;
 [Route("[controller]")]
 public class AccountController : ControllerBase
 {
-    private readonly IAccountService _accountService;
+    private readonly IAccount _account;
 
-    public AccountController(IAccountService accountService) {
-        _accountService = accountService;
+    public AccountController(IAccount account) {
+        _account = account;
     }
 
 
-    [HttpPost("register")]
+    [HttpPost("/account/register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model) 
     {
         if (!ModelState.IsValid) 
@@ -24,7 +24,7 @@ public class AccountController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await _accountService.RegisterAsync(model);
+        var result = await _account.RegisterAsync(model);
 
         if (result.Succeeded) 
         {
@@ -33,34 +33,12 @@ public class AccountController : ControllerBase
 
         return BadRequest(result.Errors);
     }
-
     
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel model) 
-    {
-        var token = await _accountService.LoginAsync(model);
-
-        if (token != null)
-        {
-            return Ok(new { Token = token });
-        }
-
-        return Unauthorized();
-    }
-
     
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
-    {
-        await _accountService.LogoutAsync();
-        return Ok(new { Message = "User logged out successfully." });
-    }
-
-    
-    [HttpDelete("delete")]
+    [HttpDelete("/account/delete")]
     public async Task<IActionResult> DeleteAccount() {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await _accountService.DeleteAccountAsync(userId);
+        var result = await _account.DeleteAccountAsync(userId);
         
         if (result.Succeeded)
         {
@@ -71,7 +49,7 @@ public class AccountController : ControllerBase
     }
 
     
-    [HttpGet("confirmemail")]
+    [HttpGet("/account/confirmemail")]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code))
@@ -79,7 +57,7 @@ public class AccountController : ControllerBase
             return BadRequest("Error confirming your email.");
         }
 
-        var result = await _accountService.ConfirmEmailAsync(userId, code);
+        var result = await _account.ConfirmEmailAsync(userId, code);
 
         if (result.Succeeded)
         {
@@ -88,4 +66,6 @@ public class AccountController : ControllerBase
 
         return BadRequest("Error confirming your email.");
     }
+    
+    // TODO: Password reset
 }

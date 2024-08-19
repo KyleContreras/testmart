@@ -2,10 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text;
+using backend.Interfaces;
 using backend.Models;
 using backend.Services;
+using IEmailSender = Microsoft.AspNetCore.Identity.UI.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,12 +39,15 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = false;
 });
 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IAccount, AccountService>();
+builder.Services.AddScoped<IAuthorization, AuthService>();
+builder.Services.AddScoped<IToken, TokenService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);

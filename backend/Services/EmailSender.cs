@@ -3,12 +3,12 @@ using Google.Apis.Gmail.v1;
 using Google.Apis.Gmail.v1.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text;
+using Google.Apis.Util;
 
 namespace backend.Services
 {
-    public class EmailSender : IEmailSender
+    public class EmailSender : Microsoft.AspNetCore.Identity.UI.Services.IEmailSender
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailSender> _logger;
@@ -62,6 +62,11 @@ namespace backend.Services
                     "user",
                     CancellationToken.None,
                     new FileDataStore(tokenPath, true));
+            }
+            
+            if (credential.Token.IsExpired(SystemClock.Default))
+            {
+                await credential.RefreshTokenAsync(CancellationToken.None);
             }
 
             var service = new GmailService(new BaseClientService.Initializer

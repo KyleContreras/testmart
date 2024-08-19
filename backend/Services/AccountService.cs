@@ -1,35 +1,32 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Text.Encodings.Web;
 using backend.DTO;
+using backend.Interfaces;
 using backend.Models;
-using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Services
 {
-    public class AccountService : IAccountService
+    public class AccountService : IAccount
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AccountService> _logger;
-        private readonly IEmailSender _emailSender;
+        private readonly Microsoft.AspNetCore.Identity.UI.Services.IEmailSender _emailSender;
 
-        public AccountService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration, ILogger<AccountService> logger, IEmailSender emailSender)
+        public AccountService(
+            UserManager<ApplicationUser> userManager, 
+            IConfiguration configuration, 
+            ILogger<AccountService> logger, 
+            Microsoft.AspNetCore.Identity.UI.Services.IEmailSender emailSender 
+            )
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _configuration = configuration;
             _logger = logger;
             _emailSender = emailSender;
         }
 
-        public async Task<IdentityResult> RegisterAsync(RegisterModel model)
-        {
+        public async Task<IdentityResult> RegisterAsync(RegisterModel model) {
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -54,27 +51,6 @@ namespace backend.Services
             return createdUser;
         }
 
-        public async Task<string?> LoginAsync(LoginModel model)
-        {
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password,
-                isPersistent: false, lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                var token = GenerateJwtToken(user);
-                return token;
-            }
-
-            return null;
-        }
-
-        public async Task LogoutAsync()
-        {
-            await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out.");
-        }
-
         public async Task<IdentityResult> DeleteAccountAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -91,7 +67,7 @@ namespace backend.Services
 
             return result;
         }
-
+        
         public async Task<IdentityResult> ConfirmEmailAsync(string userId, string code)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -102,35 +78,6 @@ namespace backend.Services
 
             var result = await _userManager.ConfirmEmailAsync(user, code);
             return result;
-        }
-
-        private string GenerateJwtToken(ApplicationUser user)
-        {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["SecretKey"];
-
-            if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32)
-            {
-                throw new ArgumentOutOfRangeException("SecretKey", "The key size must be at least 32 characters.");
-            }
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(jwtSettings.GetValue<int>("ExpiryMinutes")),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
