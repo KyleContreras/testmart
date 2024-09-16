@@ -10,22 +10,20 @@ public class AuthService : IAuthorization
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IToken _tokenService;
-    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         SignInManager<ApplicationUser> signInManager, 
         UserManager<ApplicationUser> userManager, 
-        IToken tokenService,
-        ILogger<AuthService> logger
+        IToken tokenService
         )
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _tokenService = tokenService;
-        _logger = logger;
     }
     
-    public async Task<string?> LoginAsync(LoginModel model)
+    
+    public async Task<string?> Login(LoginModel model)
     {
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password,
             isPersistent: false, lockoutOnFailure: false);
@@ -40,9 +38,9 @@ public class AuthService : IAuthorization
         return null;
     }
 
-    public async Task LogoutAsync()
+    
+    public async Task Logout()
     {
         await _signInManager.SignOutAsync();
-        _logger.LogInformation("User logged out.");
     }
 }

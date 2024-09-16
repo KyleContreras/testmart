@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using backend.DTO;
 using backend.Interfaces;
-
 namespace backend.Controllers;
 
 [ApiController]
@@ -11,35 +10,35 @@ public class AccountController : ControllerBase
 {
     private readonly IAccount _account;
 
-    public AccountController(IAccount account) {
+    public AccountController(IAccount account)
+    {
         _account = account;
     }
 
-
     [HttpPost("/account/register")]
-    public async Task<IActionResult> Register([FromBody] RegisterModel model) 
+    public async Task<IActionResult> RegisterAccount([FromBody] RegisterModel model)
     {
-        if (!ModelState.IsValid) 
+        if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _account.RegisterAsync(model);
+        var result = await _account.RegisterAccount(model);
 
-        if (result.Succeeded) 
+        if (result.Succeeded)
         {
-            return Ok((new { Message = "Registration was successful. Check your email to confirm your account" }));
+            return Ok(new { Message = "Registration was successful." });
         }
 
         return BadRequest(result.Errors);
     }
-    
-    
+
     [HttpDelete("/account/delete")]
-    public async Task<IActionResult> DeleteAccount() {
+    public async Task<IActionResult> DeleteAccount()
+    {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await _account.DeleteAccountAsync(userId);
-        
+        var result = await _account.DeleteAccount(userId);
+
         if (result.Succeeded)
         {
             return Ok(new { Message = "User account deleted successfully." });
@@ -48,7 +47,6 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
-    
     [HttpGet("/account/confirmemail")]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
@@ -57,7 +55,7 @@ public class AccountController : ControllerBase
             return BadRequest("Error confirming your email.");
         }
 
-        var result = await _account.ConfirmEmailAsync(userId, code);
+        var result = await _account.ConfirmEmail(userId, code);
 
         if (result.Succeeded)
         {
@@ -66,6 +64,4 @@ public class AccountController : ControllerBase
 
         return BadRequest("Error confirming your email.");
     }
-    
-    // TODO: Password reset
 }

@@ -1,12 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Identity;
-using System.Text;
 using backend.Interfaces;
 using backend.Models;
 using backend.Services;
-using IEmailSender = Microsoft.AspNetCore.Identity.UI.Services.IEmailSender;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,25 +26,50 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 12;
     options.Password.RequiredUniqueChars = 1;
 
-    options.SignIn.RequireConfirmedEmail = true;
-    
+    options.SignIn.RequireConfirmedEmail = false;
+
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
-    
+
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!@#$%^&*()";
     options.User.RequireUniqueEmail = false;
 });
 
-
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyProject", Version = "v1.0.0" });
+
+    var securitySchema = new OpenApiSecurityScheme
+    {
+        Description = "Using the Authorization header with the Bearer scheme.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+
+    c.AddSecurityDefinition("Bearer", securitySchema);
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { securitySchema, new[] { "Bearer" } }
+    });
+
+});
+
 builder.Services.AddHttpClient();
+
 builder.Services.AddScoped<IAccount, AccountService>();
 builder.Services.AddScoped<IAuthorization, AuthService>();
 builder.Services.AddScoped<IToken, TokenService>();
-builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -59,30 +82,20 @@ if (builder.Environment.IsDevelopment())
 
 builder.Configuration.AddEnvironmentVariables();
 
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"];
-
-if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32)
+builder.Services.AddAuthentication(options =>
 {
-    throw new ArgumentOutOfRangeException("SecretKey", "The key size must be at least 32 characters.");
-}
-
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
 {
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = key,
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
-        ValidateLifetime = true,
-    };
+    options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}/";
+    options.TokenValidationParameters =
+        new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidAudience = builder.Configuration["Auth0:Audience"],
+            ValidIssuer = $"{builder.Configuration["Auth0:Domain"]}",
+            ValidateLifetime = true,
+        };
 });
 
 builder.Services.AddCors(options =>

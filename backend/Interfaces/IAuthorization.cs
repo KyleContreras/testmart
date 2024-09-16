@@ -3,6 +3,6 @@ namespace backend.Interfaces;
 
 public interface IAuthorization
 {
-    public Task<string?> LoginAsync(LoginModel model);
-    public Task LogoutAsync();
+    public Task<string?> Login(LoginModel model);
+    public Task Logout();
 }

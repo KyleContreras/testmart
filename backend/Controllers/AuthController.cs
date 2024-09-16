@@ -17,9 +17,9 @@ public class AuthController : ControllerBase
 
     
     [HttpPost("/auth/login")]
-    public async Task<IActionResult> LoginAsync([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        var token = await _authorization.LoginAsync(model);
+        var token = await _authorization.Login(model);
 
         if (token != null)
         {
@@ -31,9 +31,9 @@ public class AuthController : ControllerBase
 
 
     [HttpPost("/auth/logout")]
-    public async Task<IActionResult> LogoutAsync()
+    public async Task<IActionResult> Logout()
     {
-        await _authorization.LogoutAsync();
+        await _authorization.Logout();
         return Ok(new { Message = "User logged out successfully." });
     }
     
