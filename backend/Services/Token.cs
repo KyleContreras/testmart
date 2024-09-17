@@ -19,8 +19,7 @@ public class Token : IToken
 
     public string GenerateJwtToken(ApplicationUser user)
     {
-        var jwtSettings = _configuration.GetSection("JwtSettings");
-        var secretKey = jwtSettings["SecretKey"];
+        var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET");
 
         if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32)
         {
@@ -28,8 +27,9 @@ public class Token : IToken
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+        var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var jwtSettings = _configuration.GetSection("JWT");
+        
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
@@ -41,7 +41,7 @@ public class Token : IToken
             audience: jwtSettings["Audience"],
             claims: claims,
             expires: DateTime.Now.AddMinutes(jwtSettings.GetValue<int>("ExpiryMinutes")),
-            signingCredentials: creds);
+            signingCredentials: signingCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
