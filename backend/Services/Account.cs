@@ -4,11 +4,11 @@ using backend.Interfaces;
 using backend.Models;
 namespace backend.Services;
 
-public class AccountService : IAccount
+public class Account : IAccount
 {
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public AccountService(UserManager<ApplicationUser> userManager)
+    public Account(UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
     }

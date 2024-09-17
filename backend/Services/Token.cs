@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using backend.Interfaces;
 using backend.Models;
@@ -7,11 +8,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Services;
 
-public class TokenService : IToken
+public class Token : IToken
 {
     private readonly IConfiguration _configuration;
 
-    public TokenService(IConfiguration configuration)
+    public Token(IConfiguration configuration)
     {
         _configuration = configuration;
     }
@@ -43,5 +44,16 @@ public class TokenService : IToken
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateRefreshToken() {
+        var randomNumber = new byte[32];
+
+        using (var rng = RandomNumberGenerator.Create()) 
+        {
+            rng.GetBytes(randomNumber);    
+        }
+
+        return Convert.ToBase64String(randomNumber);
     }
 }

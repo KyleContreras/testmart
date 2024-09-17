@@ -1,6 +1,6 @@
 ﻿namespace backend.Interfaces;
 
-public interface IGmailSender
+public interface IGmail
 {
     public Task SendConfirmationEmailAsync(string email, string confirmationLink);
 }

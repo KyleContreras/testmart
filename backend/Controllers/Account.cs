@@ -6,11 +6,11 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AccountController : ControllerBase
+public class Account : ControllerBase
 {
     private readonly IAccount _account;
 
-    public AccountController(IAccount account)
+    public Account(IAccount account)
     {
         _account = account;
     }

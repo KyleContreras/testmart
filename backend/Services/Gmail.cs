@@ -3,11 +3,11 @@ using MimeKit;
 
 namespace backend.Services;
 
-public class GmailService : IGmailSender
+public class Gmail : IGmail
 {
     private readonly Google.Apis.Gmail.v1.GmailService _gmailService;
 
-    public GmailService(Google.Apis.Gmail.v1.GmailService gmailService)
+    public Gmail(Google.Apis.Gmail.v1.GmailService gmailService)
     {
         _gmailService = gmailService;
     }

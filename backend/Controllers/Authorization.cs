@@ -7,11 +7,11 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController : ControllerBase
+public class Authorization : ControllerBase
 {
     private readonly IAuthorization _authorization;
 
-    public AuthController(IAuthorization authorization) {
+    public Authorization(IAuthorization authorization) {
         _authorization = authorization;
     }
 
@@ -19,11 +19,11 @@ public class AuthController : ControllerBase
     [HttpPost("/auth/login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        var token = await _authorization.Login(model);
+        var (jwt, refreshToken) = await _authorization.Login(model);
 
-        if (token != null)
+        if (jwt != null && refreshToken != null)
         {
-            return Ok(new { Token = token });
+            return Ok(new { JWT = jwt, RefreshToken = refreshToken });
         }
 
         return Unauthorized();
